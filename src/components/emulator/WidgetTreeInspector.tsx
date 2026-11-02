@@ -20,7 +20,7 @@ export const WidgetTreeInspector: React.FC<WidgetTreeInspectorProps> = ({ tree }
       case 'framework':
         return <Cpu className="w-3.5 h-3.5 text-indigo-400 dark:text-[#818CF8]" aria-hidden="true" />;
       case 'layout':
-        return <Layers className="w-3.5 h-3.5 text-sky-400 dark:text-[#A78BFA]" aria-hidden="true" />;
+        return <Layers className="w-3.5 h-3.5 text-sky-400 dark:text-[#38BDF8]" aria-hidden="true" />;
       case 'component':
         return <Box className="w-3.5 h-3.5 text-amber-400 dark:text-[#FBBF24]" aria-hidden="true" />;
       case 'leaf':
@@ -49,8 +49,8 @@ export const WidgetTreeInspector: React.FC<WidgetTreeInspectorProps> = ({ tree }
           }}
           className={`group flex items-center gap-1.5 py-1 px-2 rounded-md font-mono text-xs cursor-pointer transition-colors ${
             isSelected
-              ? 'bg-sky-500/20 dark:bg-[#1E1733] text-sky-300 dark:text-[#C4B5FD] font-semibold border border-sky-500/40 dark:border-[#3B2D5C]'
-              : 'text-slate-300 dark:text-[#C4C2D1] hover:bg-slate-800/80 dark:hover:bg-[#151221] hover:text-white'
+              ? 'bg-sky-500/20 dark:bg-[#18181D] text-sky-300 dark:text-white font-semibold border border-sky-500/40 dark:border-[#2B2B32]'
+              : 'text-slate-300 dark:text-[#D4D4D8] hover:bg-slate-800/80 dark:hover:bg-[#16161A] hover:text-white'
           }`}
           style={{ paddingLeft: `${depth * 16 + 6}px` }}
         >
@@ -59,7 +59,7 @@ export const WidgetTreeInspector: React.FC<WidgetTreeInspectorProps> = ({ tree }
               type="button"
               aria-label={isCollapsed ? `Buka cabang ${node.name}` : `Tutup cabang ${node.name}`}
               onClick={(e) => toggleCollapse(node.id, e)}
-              className="p-0.5 rounded text-slate-400 dark:text-[#8E8C9A] hover:text-slate-100 focus:outline-none"
+              className="p-0.5 rounded text-slate-400 dark:text-[#8A8A93] hover:text-slate-100 focus:outline-none"
             >
               {isCollapsed ? (
                 <ChevronRight className="w-3 h-3" />
@@ -80,12 +80,12 @@ export const WidgetTreeInspector: React.FC<WidgetTreeInspectorProps> = ({ tree }
           <span
             className={`ml-auto text-[10px] px-1.5 py-0.2 rounded uppercase font-sans tracking-wide ${
               node.type === 'framework'
-                ? 'bg-indigo-950/80 dark:bg-[#191730] text-indigo-300 dark:text-[#C4B5FD] border border-indigo-800/50 dark:border-[#332E5E]'
+                ? 'bg-indigo-950/80 dark:bg-[#18181F] text-indigo-300 dark:text-[#818CF8] border border-indigo-800/50 dark:border-[#2B2B38]'
                 : node.type === 'layout'
-                ? 'bg-sky-950/80 dark:bg-[#1C172E] text-sky-300 dark:text-[#A78BFA] border border-sky-800/50 dark:border-[#3B2D5C]'
+                ? 'bg-sky-950/80 dark:bg-[#18181F] text-sky-300 dark:text-[#38BDF8] border border-sky-800/50 dark:border-[#202838]'
                 : node.type === 'component'
-                ? 'bg-amber-950/80 dark:bg-[#261D0F] text-amber-300 dark:text-[#FBBF24] border border-amber-800/50 dark:border-[#4B381A]'
-                : 'bg-emerald-950/80 dark:bg-[#11241A] text-emerald-300 dark:text-[#34D399] border border-emerald-800/50 dark:border-[#1E4330]'
+                ? 'bg-amber-950/80 dark:bg-[#201B11] text-amber-300 dark:text-[#FBBF24] border border-amber-800/50 dark:border-[#382E18]'
+                : 'bg-emerald-950/80 dark:bg-[#112017] text-emerald-300 dark:text-[#34D399] border border-emerald-800/50 dark:border-[#1A3828]'
             }`}
           >
             {node.type}
@@ -95,7 +95,7 @@ export const WidgetTreeInspector: React.FC<WidgetTreeInspectorProps> = ({ tree }
         {hasChildren && !isCollapsed && (
           <div className="relative">
             <div
-              className="absolute left-[11px] top-0 bottom-0 border-l border-slate-700/60 dark:border-[#221F33]"
+              className="absolute left-[11px] top-0 bottom-0 border-l border-slate-700/60 dark:border-[#202025]"
               style={{ left: `${depth * 16 + 12}px` }}
             />
             {node.children!.map((child) => renderNode(child, depth + 1))}
@@ -106,14 +106,14 @@ export const WidgetTreeInspector: React.FC<WidgetTreeInspectorProps> = ({ tree }
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-900/90 dark:bg-[#0B0A11] text-slate-200 dark:text-[#C4C2D1] rounded-2xl overflow-hidden border border-slate-800 dark:border-[#221F33]">
+    <div className="flex flex-col h-full bg-slate-900/90 dark:bg-[#09090B] text-slate-200 dark:text-[#D4D4D8] rounded-2xl overflow-hidden border border-slate-800 dark:border-[#202025]">
       {/* Header Info */}
-      <div className="p-3 border-b border-slate-800 dark:border-[#221F33] bg-slate-950/60 dark:bg-[#12101B] flex items-center justify-between">
+      <div className="p-3 border-b border-slate-800 dark:border-[#202025] bg-slate-950/60 dark:bg-[#111114] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-sky-400 dark:text-[#A78BFA]" />
+          <Layers className="w-4 h-4 text-sky-400 dark:text-[#38BDF8]" />
           <span className="text-xs font-semibold text-slate-200 dark:text-white">Flutter Widget Tree</span>
         </div>
-        <span className="text-[11px] text-slate-400 dark:text-[#8E8C9A]">Klik node untuk detail</span>
+        <span className="text-[11px] text-slate-400 dark:text-[#8A8A93]">Klik node untuk detail</span>
       </div>
 
       {/* Tree Visualization Area */}
@@ -123,13 +123,13 @@ export const WidgetTreeInspector: React.FC<WidgetTreeInspectorProps> = ({ tree }
 
       {/* Selected Node Inspector Drawer */}
       {selectedNode && (
-        <div className="p-3.5 border-t border-slate-800 dark:border-[#221F33] bg-slate-950/90 dark:bg-[#12101B] space-y-1.5 text-xs">
+        <div className="p-3.5 border-t border-slate-800 dark:border-[#202025] bg-slate-950/90 dark:bg-[#111114] space-y-1.5 text-xs">
           <div className="flex items-center gap-2">
             {getNodeIcon(selectedNode.type)}
-            <span className="font-mono font-semibold text-sky-300 dark:text-[#A78BFA]">{selectedNode.name}</span>
-            <span className="text-[10px] text-slate-400 dark:text-[#8E8C9A]">({selectedNode.type})</span>
+            <span className="font-mono font-semibold text-sky-300 dark:text-[#38BDF8]">{selectedNode.name}</span>
+            <span className="text-[10px] text-slate-400 dark:text-[#8A8A93]">({selectedNode.type})</span>
           </div>
-          <p className="text-slate-300 dark:text-[#C4C2D1] leading-relaxed font-sans">{selectedNode.description}</p>
+          <p className="text-slate-300 dark:text-[#A1A1AA] leading-relaxed font-sans">{selectedNode.description}</p>
         </div>
       )}
     </div>

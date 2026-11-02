@@ -33,7 +33,7 @@
 
   /* R-32: Visible focus indicator for keyboard navigation */
   *:focus-visible {
-    outline: 2px solid #7c3aed;
+    outline: 2px solid #0284c7;
     outline-offset: 2px;
   }
 
@@ -49,18 +49,18 @@
     }
   }
 
-  /* Railway Dark Theme Global Defaults */
+  /* Pure Neutral Industrial Dark Theme (No Purple Slop / Neutral Charcoal & Pitch Black) */
   .dark {
     color-scheme: dark;
-    --background: #08070c;
-    --card: #12101b;
-    --border: #221f33;
-    --muted: #8e8c9a;
+    --background: #09090b;
+    --card: #121215;
+    --border: #202025;
+    --muted: #8a8a93;
   }
 
   .dark body {
-    background-color: #08070c;
-    color: #f3f4f6;
+    background-color: #09090b;
+    color: #f4f4f5;
   }
 }
 
@@ -80,7 +80,7 @@
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #262238;
+  background: #27272a;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -88,5 +88,5 @@
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #3b3554;
+  background: #3f3f46;
 }

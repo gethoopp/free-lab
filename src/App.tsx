@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { FLUTTER_TOPICS } from './data/flutterTopics';
+import { DART_TOPICS } from './data/dartTopics';
 import type { FlutterTopic, EmulatorRuntimeState } from './types/flutter';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
@@ -51,6 +52,16 @@ export function App() {
     }
   });
 
+  // Manually completed topics ("Tandai Selesai") stored in localStorage
+  const [completedTopics, setCompletedTopics] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('freelab-completed-topics');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   // Flutter Unlocked Topics & Completed Challenges
   const [unlockedFlutterTopicIds, setUnlockedFlutterTopicIds] = useState<string[]>(() => {
     try {
@@ -58,6 +69,16 @@ export function App() {
       return saved ? JSON.parse(saved) : ['what-is-widget'];
     } catch {
       return ['what-is-widget'];
+    }
+  });
+
+  // Dart Unlocked Topics
+  const [unlockedDartTopicIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('freelab-unlocked-dart-topics');
+      return saved ? JSON.parse(saved) : ['dart-variables'];
+    } catch {
+      return ['dart-variables'];
     }
   });
 
@@ -70,11 +91,28 @@ export function App() {
     }
   });
 
+  // Auto-restore last visited track and topic
+  const [lastVisitedTrack, setLastVisitedTrack] = useState<'dart' | 'flutter' | null>(() => {
+    try {
+      return (localStorage.getItem('freelab-last-track') as 'dart' | 'flutter') || null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [activeTopicId, setActiveTopicId] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem('freelab-last-flutter-topic');
+      return saved || 'what-is-widget';
+    } catch {
+      return 'what-is-widget';
+    }
+  });
+
   const [showFlutterUnlockModal, setShowFlutterUnlockModal] = useState<boolean>(false);
   const [manualFlutterCodeInput, setManualFlutterCodeInput] = useState<string>('');
   const [flutterUnlockMessage, setFlutterUnlockMessage] = useState<{ text: string; isError: boolean } | null>(null);
 
-  const [activeTopicId, setActiveTopicId] = useState<string>('what-is-widget');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [mobileView, setMobileView] = useState<'content' | 'emulator'>('content');
   const [emulatorState, setEmulatorState] =
@@ -109,6 +147,18 @@ export function App() {
     });
   }, []);
 
+  const handleToggleTopicCompletion = useCallback((id: string) => {
+    setCompletedTopics((prev) => {
+      const next = prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id];
+      try {
+        localStorage.setItem('freelab-completed-topics', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
   // Filter Flutter topics based on search query
   const filteredTopics = useMemo(() => {
     if (!searchQuery.trim()) return FLUTTER_TOPICS;
@@ -128,6 +178,20 @@ export function App() {
     );
   }, [activeTopicId]);
 
+  // Track last visited topic title for quick resume on Dashboard
+  const lastVisitedTopicTitle = useMemo(() => {
+    if (lastVisitedTrack === 'dart') {
+      const topicId = localStorage.getItem('freelab-last-dart-topic');
+      const found = DART_TOPICS.find((t) => t.id === topicId);
+      return found ? found.title : DART_TOPICS[0].title;
+    } else if (lastVisitedTrack === 'flutter') {
+      const topicId = localStorage.getItem('freelab-last-flutter-topic');
+      const found = FLUTTER_TOPICS.find((t) => t.id === topicId);
+      return found ? found.title : FLUTTER_TOPICS[0].title;
+    }
+    return null;
+  }, [lastVisitedTrack]);
+
   // Stable callback that never triggers infinite loops or editor resets
   const handleUpdateEmulatorState = useCallback(
     (updates: Partial<EmulatorRuntimeState>) => {
@@ -146,6 +210,11 @@ export function App() {
       return;
     }
     setActiveTopicId(id);
+    try {
+      localStorage.setItem('freelab-last-flutter-topic', id);
+      localStorage.setItem('freelab-last-track', 'flutter');
+      setLastVisitedTrack('flutter');
+    } catch {}
   }, [unlockedFlutterTopicIds]);
 
   const handleFlutterChallengeCompleted = useCallback((topicId: string, nextTopicId?: string) => {
@@ -160,6 +229,11 @@ export function App() {
       return prev;
     });
 
+    // Also mark topic as completed
+    if (!completedTopics.includes(topicId)) {
+      handleToggleTopicCompletion(topicId);
+    }
+
     if (nextTopicId) {
       setUnlockedFlutterTopicIds((prev) => {
         if (!prev.includes(nextTopicId)) {
@@ -172,7 +246,7 @@ export function App() {
         return prev;
       });
     }
-  }, []);
+  }, [completedTopics, handleToggleTopicCompletion]);
 
   const handleManualFlutterUnlock = (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,11 +287,16 @@ export function App() {
     }
   };
 
+  const handleResumeLastTopic = useCallback(() => {
+    const track = lastVisitedTrack || 'flutter';
+    setCurrentView(track);
+  }, [lastVisitedTrack]);
+
   return (
     <div
       className={`min-h-screen flex flex-col transition-colors ${
         theme === 'dark'
-          ? 'bg-[#08070C] text-[#F3F4F6]'
+          ? 'bg-[#09090B] text-[#F4F4F5]'
           : 'bg-slate-50 text-slate-900'
       }`}
     >
@@ -236,7 +315,33 @@ export function App() {
       {/* VIEW 1: INTRODUCTION DASHBOARD (Default Landing View) */}
       {currentView === 'dashboard' && (
         <main className="flex-1 w-full">
-          <IntroductionDashboard onSelectTrack={(track) => setCurrentView(track)} />
+          <IntroductionDashboard
+            onSelectTrack={(track) => {
+              setCurrentView(track);
+              setLastVisitedTrack(track);
+              try {
+                localStorage.setItem('freelab-last-track', track);
+              } catch {}
+            }}
+            completedTopics={completedTopics}
+            lastVisitedTrack={lastVisitedTrack}
+            lastVisitedTopicTitle={lastVisitedTopicTitle}
+            onResumeLastTopic={handleResumeLastTopic}
+            unlockedDartTopicIds={unlockedDartTopicIds}
+            unlockedFlutterTopicIds={unlockedFlutterTopicIds}
+            onSelectDartTopic={(topicId) => {
+              try {
+                localStorage.setItem('freelab-last-dart-topic', topicId);
+                localStorage.setItem('freelab-last-track', 'dart');
+              } catch {}
+              setLastVisitedTrack('dart');
+              setCurrentView('dart');
+            }}
+            onSelectFlutterTopic={(topicId) => {
+              handleSelectFlutterTopic(topicId);
+              setCurrentView('flutter');
+            }}
+          />
         </main>
       )}
 
@@ -244,9 +349,24 @@ export function App() {
       {currentView === 'dart' && (
         <DartWorkspace
           onBackToDashboard={() => setCurrentView('dashboard')}
-          onSwitchToFlutter={() => setCurrentView('flutter')}
+          onSwitchToFlutter={() => {
+            setCurrentView('flutter');
+            setLastVisitedTrack('flutter');
+            try {
+              localStorage.setItem('freelab-last-track', 'flutter');
+            } catch {}
+          }}
           bookmarkedTopics={bookmarkedTopics}
           onToggleBookmark={handleToggleBookmark}
+          completedTopics={completedTopics}
+          onToggleTopicCompletion={handleToggleTopicCompletion}
+          onTopicVisited={(t) => {
+            setLastVisitedTrack('dart');
+            try {
+              localStorage.setItem('freelab-last-track', 'dart');
+              localStorage.setItem('freelab-last-dart-topic', t.id);
+            } catch {}
+          }}
         />
       )}
 
@@ -256,7 +376,7 @@ export function App() {
           {/* Left Nav: Curriculum Topics Sidebar */}
           <aside
             aria-label="Daftar Modul Pembelajaran Flutter"
-            className="lg:w-60 xl:w-64 shrink-0 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-[#221F33] pb-4 lg:pb-0 lg:pr-5"
+            className="lg:w-60 xl:w-64 shrink-0 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-[#202025] pb-4 lg:pb-0 lg:pr-5"
           >
             <div className="sticky top-20">
               <Sidebar
@@ -267,6 +387,7 @@ export function App() {
                 onToggleBookmark={handleToggleBookmark}
                 unlockedTopicIds={unlockedFlutterTopicIds}
                 completedChallengeIds={completedFlutterChallengeIds}
+                completedTopics={completedTopics}
                 onRequestUnlockModal={() => setShowFlutterUnlockModal(true)}
               />
             </div>
@@ -288,6 +409,8 @@ export function App() {
               isChallengeCompleted={completedFlutterChallengeIds.includes(activeTopic.id)}
               onChallengeCompleted={handleFlutterChallengeCompleted}
               onNavigateTopic={handleSelectFlutterTopic}
+              isTopicCompleted={completedTopics.includes(activeTopic.id)}
+              onToggleTopicCompletion={handleToggleTopicCompletion}
             />
           </section>
 
@@ -312,9 +435,9 @@ export function App() {
 
       {/* Manual Unlock Modal Dialog for Flutter */}
       {showFlutterUnlockModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in">
-          <div className="w-full max-w-md bg-white dark:bg-[#12101B] border border-slate-200 dark:border-[#221F33] rounded-3xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#221F33] pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-md bg-white dark:bg-[#111114] border border-slate-200 dark:border-[#202025] rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#202025] pb-3">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-[#251E14] text-amber-600 dark:text-[#FBBF24] flex items-center justify-center">
                   <KeyRound className="w-4 h-4" />
@@ -336,7 +459,7 @@ export function App() {
               </button>
             </div>
 
-            <p className="text-xs text-slate-600 dark:text-[#8E8C9A] leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-[#8A8A93] leading-relaxed">
               Modul Flutter lanjutan ini masih terkunci. Selesaikan tantangan kuis pada modul sebelumnya untuk mendapatkan kode akses otomatis, atau masukkan kode akses yang telah Anda peroleh di bawah ini:
             </p>
 
@@ -350,8 +473,8 @@ export function App() {
                   type="text"
                   value={manualFlutterCodeInput}
                   onChange={(e) => setManualFlutterCodeInput(e.target.value)}
-                  placeholder="Contoh: KODE-AKSES-01"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-[#0B0A11] border border-slate-300 dark:border-[#221F33] text-slate-900 dark:text-white font-mono text-xs uppercase placeholder-slate-400 focus:outline-none focus:border-amber-500"
+                  placeholder="Contoh: FREE-FLUTTER-STATE-101"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-[#09090B] border border-slate-300 dark:border-[#202025] text-slate-900 dark:text-white font-mono text-xs uppercase placeholder-slate-400 focus:outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -371,7 +494,7 @@ export function App() {
                 <button
                   type="button"
                   onClick={() => setShowFlutterUnlockModal(false)}
-                  className="px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-[#8E8C9A] hover:bg-slate-100 dark:hover:bg-[#1C172E]"
+                  className="px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-[#8A8A93] hover:bg-slate-100 dark:hover:bg-[#18181D]"
                 >
                   Batal
                 </button>
@@ -388,7 +511,7 @@ export function App() {
       )}
 
       {/* Footer Landmark (R-39) */}
-      <footer className="border-t border-slate-200 dark:border-[#221F33] py-6 px-4 text-center text-xs text-slate-600 dark:text-[#8E8C9A] bg-white/70 dark:bg-[#08070C]/90 mt-auto">
+      <footer className="border-t border-slate-200 dark:border-[#202025] py-6 px-4 text-center text-xs text-slate-600 dark:text-[#8A8A93] bg-white/70 dark:bg-[#09090B] mt-auto">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>
             FreeLab: Platform Pembelajaran Pemrograman Dart &amp; Flutter

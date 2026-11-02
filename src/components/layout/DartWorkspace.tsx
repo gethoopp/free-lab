@@ -30,6 +30,9 @@ interface DartWorkspaceProps {
   onSwitchToFlutter: () => void;
   bookmarkedTopics: string[];
   onToggleBookmark: (id: string) => void;
+  completedTopics: string[];
+  onToggleTopicCompletion: (topicId: string) => void;
+  onTopicVisited?: (topic: DartTopic) => void;
 }
 
 export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
@@ -37,9 +40,19 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
   onSwitchToFlutter,
   bookmarkedTopics,
   onToggleBookmark,
+  completedTopics,
+  onToggleTopicCompletion,
+  onTopicVisited,
 }) => {
-  const [activeTopicId, setActiveTopicId] = useState<string>('dart-variables');
-  const [activeTab, setActiveTab] = useState<'reference' | 'playground' | 'quiz'>('quiz');
+  const [activeTopicId, setActiveTopicId] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem('freelab-last-dart-topic');
+      return saved || 'dart-variables';
+    } catch {
+      return 'dart-variables';
+    }
+  });
+  const [activeTab, setActiveTab] = useState<'quiz' | 'playground' | 'reference'>('quiz');
   const [filterMode, setFilterMode] = useState<'all' | 'favorites'>('all');
   const [copied, setCopied] = useState<boolean>(false);
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
@@ -72,6 +85,14 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
   const activeTopic =
     DART_TOPICS.find((t) => t.id === activeTopicId) || DART_TOPICS[0];
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('freelab-last-dart-topic', activeTopic.id);
+      localStorage.setItem('freelab-last-track', 'dart');
+      if (onTopicVisited) onTopicVisited(activeTopic);
+    } catch {}
+  }, [activeTopic, onTopicVisited]);
+
   // Playground state
   const [playgroundCode, setPlaygroundCode] = useState<string>(activeTopic.dartCode);
   const [runResult, setRunResult] = useState<DartRunResult>({
@@ -94,6 +115,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
   const quizHighlightLayerRef = useRef<HTMLDivElement>(null);
 
   const isBookmarked = bookmarkedTopics.includes(activeTopic.id);
+  const isTopicMarkedDone = completedTopics.includes(activeTopic.id);
   const isCurrentQuizCompleted = completedChallengeIds.includes(activeTopic.id);
 
   const visibleTopics =
@@ -191,13 +213,18 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
     setGradeResult(grading);
 
     if (grading.passed) {
-      // Mark as completed
+      // Mark as completed challenge
       if (!completedChallengeIds.includes(activeTopic.id)) {
         const nextCompleted = [...completedChallengeIds, activeTopic.id];
         setCompletedChallengeIds(nextCompleted);
         try {
           localStorage.setItem('freelab-completed-dart-challenges', JSON.stringify(nextCompleted));
         } catch {}
+      }
+
+      // Automatically mark topic as completed as well
+      if (!completedTopics.includes(activeTopic.id)) {
+        onToggleTopicCompletion(activeTopic.id);
       }
 
       // Unlock next topic if exists
@@ -285,18 +312,18 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
       {/* Left Sidebar: Dart Topics & Unlock Status */}
       <aside
         aria-label="Daftar Modul Dart"
-        className="lg:w-64 shrink-0 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-[#221F33] pb-4 lg:pb-0 lg:pr-5 select-none"
+        className="lg:w-64 shrink-0 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-[#202025] pb-4 lg:pb-0 lg:pr-5 select-none"
       >
         <div className="sticky top-20 space-y-4">
           {/* Bookmark Filter Segmented Control */}
-          <div className="p-1 bg-slate-100 dark:bg-[#12101B] border border-slate-200 dark:border-[#221F33] rounded-xl flex items-center text-xs">
+          <div className="p-1 bg-slate-100 dark:bg-[#111114] border border-slate-200 dark:border-[#202025] rounded-xl flex items-center text-xs">
             <button
               type="button"
               onClick={() => setFilterMode('all')}
               className={`flex-1 py-1.5 px-2 rounded-lg font-medium text-center transition-all ${
                 filterMode === 'all'
-                  ? 'bg-white dark:bg-[#201C30] text-slate-900 dark:text-white shadow-xs font-semibold'
-                  : 'text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-white dark:bg-[#1C1C21] text-slate-900 dark:text-white shadow-xs font-semibold'
+                  : 'text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Semua ({DART_TOPICS.length})
@@ -308,7 +335,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
               className={`flex-1 py-1.5 px-2 rounded-lg font-medium text-center flex items-center justify-center gap-1.5 transition-all ${
                 filterMode === 'favorites'
                   ? 'bg-amber-500 text-white shadow-xs font-semibold'
-                  : 'text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white'
+                  : 'text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <Bookmark className={`w-3 h-3 ${filterMode === 'favorites' ? 'fill-current' : ''}`} />
@@ -316,12 +343,12 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
             </button>
           </div>
 
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-[#8E8C9A] uppercase tracking-wider px-2">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-[#8A8A93] uppercase tracking-wider px-2">
             <span>Modul Dart</span>
             <button
               type="button"
               onClick={() => setShowUnlockModal(true)}
-              className="inline-flex items-center gap-1 font-mono text-[10px] text-sky-600 dark:text-[#A78BFA] hover:underline"
+              className="inline-flex items-center gap-1 font-mono text-[10px] text-sky-600 dark:text-[#38BDF8] hover:underline"
               title="Masukkan kode akses materi"
             >
               <KeyRound className="w-3 h-3" />
@@ -335,7 +362,8 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
               const isActive = topic.id === activeTopic.id;
               const isTopicBookmarked = bookmarkedTopics.includes(topic.id);
               const isUnlocked = unlockedTopicIds.includes(topic.id);
-              const isCompleted = completedChallengeIds.includes(topic.id);
+              const isChallengeDone = completedChallengeIds.includes(topic.id);
+              const isTopicDone = completedTopics.includes(topic.id);
 
               return (
                 <li key={topic.id} className="relative group">
@@ -344,17 +372,17 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                     onClick={() => handleSelectTopic(topic)}
                     className={`w-full text-left pl-3 pr-8 py-2 rounded-xl text-xs font-medium transition-all flex items-center justify-between ${
                       isActive
-                        ? 'bg-sky-600 dark:bg-[#7C3AED] text-white shadow-sm font-semibold'
+                        ? 'bg-slate-900 dark:bg-white text-white dark:text-black font-semibold shadow-xs'
                         : isUnlocked
-                        ? 'text-slate-700 dark:text-[#C4C2D1] hover:bg-slate-200/70 dark:hover:bg-[#151221] hover:text-slate-950 dark:hover:text-white'
-                        : 'text-slate-400 dark:text-[#58546A] hover:bg-slate-100 dark:hover:bg-[#100E1A]'
+                        ? 'text-slate-700 dark:text-[#D4D4D8] hover:bg-slate-200/70 dark:hover:bg-[#18181D] hover:text-slate-950 dark:hover:text-white'
+                        : 'text-slate-400 dark:text-[#52525B] hover:bg-slate-100 dark:hover:bg-[#111114]'
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
-                      {isCompleted ? (
+                      {isTopicDone || isChallengeDone ? (
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 dark:text-[#34D399] shrink-0" />
                       ) : !isUnlocked ? (
-                        <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-[#58546A] shrink-0" />
+                        <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-[#52525B] shrink-0" />
                       ) : (
                         <span className="w-3.5 text-center font-mono text-[10px] text-slate-400">
                           {index + 1}
@@ -366,15 +394,15 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                     <span
                       className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-mono tracking-wide shrink-0 ml-1.5 ${
                         isActive
-                          ? 'bg-sky-700 dark:bg-[#6D28D9] text-white'
-                          : isCompleted
-                          ? 'bg-emerald-100 dark:bg-[#132B1E] text-emerald-700 dark:text-[#34D399]'
+                          ? 'bg-slate-800 dark:bg-[#E4E4E7] text-slate-200 dark:text-black'
+                          : isTopicDone || isChallengeDone
+                          ? 'bg-emerald-100 dark:bg-[#122419] text-emerald-700 dark:text-[#34D399]'
                           : !isUnlocked
-                          ? 'bg-slate-200/60 dark:bg-[#171424] text-slate-400 dark:text-[#58546A]'
-                          : 'bg-slate-100 dark:bg-[#1C172E] text-slate-500 dark:text-[#8E8C9A]'
+                          ? 'bg-slate-200/60 dark:bg-[#18181D] text-slate-400 dark:text-[#52525B]'
+                          : 'bg-slate-100 dark:bg-[#16161B] text-slate-500 dark:text-[#8A8A93]'
                       }`}
                     >
-                      {isCompleted ? 'Lulus' : !isUnlocked ? 'Terkunci' : topic.difficulty}
+                      {isTopicDone ? 'Selesai' : isChallengeDone ? 'Lulus' : !isUnlocked ? 'Terkunci' : topic.difficulty}
                     </span>
                   </button>
 
@@ -402,7 +430,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
 
           {/* Empty state for favorites */}
           {filterMode === 'favorites' && visibleTopics.length === 0 && (
-            <div className="p-4 text-center text-xs text-slate-500 dark:text-[#8E8C9A] bg-slate-100 dark:bg-[#12101B]/50 rounded-xl border border-slate-200 dark:border-[#221F33] space-y-2">
+            <div className="p-4 text-center text-xs text-slate-500 dark:text-[#8A8A93] bg-slate-100 dark:bg-[#111114] rounded-xl border border-slate-200 dark:border-[#202025] space-y-2">
               <Bookmark className="w-5 h-5 mx-auto text-amber-500/70" />
               <p className="font-semibold text-slate-700 dark:text-slate-300">
                 Belum ada topik favorit
@@ -413,11 +441,11 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
             </div>
           )}
 
-          <div className="pt-4 border-t border-slate-200 dark:border-[#221F33] space-y-2">
+          <div className="pt-4 border-t border-slate-200 dark:border-[#202025] space-y-2">
             <button
               type="button"
               onClick={onSwitchToFlutter}
-              className="w-full py-2 px-3 rounded-xl bg-slate-100 dark:bg-[#12101B] hover:bg-indigo-50 dark:hover:bg-[#1C172E] text-slate-700 dark:text-[#C4C2D1] hover:text-indigo-600 dark:hover:text-[#A78BFA] border border-slate-200 dark:border-[#221F33] text-xs font-medium flex items-center justify-between transition-colors"
+              className="w-full py-2 px-3 rounded-xl bg-slate-100 dark:bg-[#111114] hover:bg-slate-200 dark:hover:bg-[#18181D] text-slate-700 dark:text-[#D4D4D8] border border-slate-200 dark:border-[#202025] text-xs font-medium flex items-center justify-between transition-colors"
             >
               <span>Lanjut ke Jalur Flutter</span>
               <ChevronRight className="w-4 h-4" />
@@ -429,63 +457,82 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
       {/* Main Content Area */}
       <main className="flex-1 min-w-0 space-y-6">
         {/* Topic Header & Breadcrumb */}
-        <div className="space-y-3 border-b border-slate-200 dark:border-[#221F33] pb-5">
+        <div className="space-y-3 border-b border-slate-200 dark:border-[#202025] pb-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs">
               <button
                 type="button"
                 onClick={onBackToDashboard}
-                className="text-sky-600 dark:text-[#A78BFA] hover:underline font-medium"
+                className="text-sky-600 dark:text-[#38BDF8] hover:underline font-medium"
               >
                 ← Dashboard
               </button>
-              <span className="text-slate-400 dark:text-[#524E65]">/</span>
-              <span className="text-slate-600 dark:text-[#8E8C9A] font-medium">Jalur Dart</span>
-              <span className="text-slate-400 dark:text-[#524E65]">•</span>
-              <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#1C172E] border border-slate-200 dark:border-[#3B2D5C] text-slate-700 dark:text-[#C4B5FD] font-mono text-[10px]">
+              <span className="text-slate-400 dark:text-[#52525B]">/</span>
+              <span className="text-slate-600 dark:text-[#8A8A93] font-medium">Jalur Dart</span>
+              <span className="text-slate-400 dark:text-[#52525B]">•</span>
+              <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#18181F] border border-slate-200 dark:border-[#262630] text-slate-700 dark:text-[#D4D4D8] font-mono text-[10px]">
                 {activeTopic.difficulty}
               </span>
               {isCurrentQuizCompleted && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-[#132B1E] text-emerald-700 dark:text-[#34D399] font-mono text-[10px] font-semibold border border-emerald-300 dark:border-[#1E4330]">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-[#122419] text-emerald-700 dark:text-[#34D399] font-mono text-[10px] font-semibold border border-emerald-300 dark:border-[#1E4D33]">
                   <CheckCircle2 className="w-3 h-3" />
                   <span>Kuis Selesai</span>
                 </span>
               )}
             </div>
 
-            {/* Bookmark Button */}
-            <button
-              type="button"
-              onClick={() => onToggleBookmark(activeTopic.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
-                isBookmarked
-                  ? 'bg-amber-50 dark:bg-[#251E14] text-amber-700 dark:text-[#FBBF24] border-amber-300 dark:border-[#523B19] shadow-xs'
-                  : 'bg-slate-100 dark:bg-[#12101B] text-slate-700 dark:text-[#8E8C9A] border-slate-200 dark:border-[#221F33] hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#1C172E]'
-              }`}
-              aria-label={isBookmarked ? 'Hapus dari daftar favorit' : 'Simpan topik ke daftar favorit'}
-              title={isBookmarked ? 'Tersimpan di Favorit' : 'Simpan topik ke favorit'}
-            >
-              <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-current' : ''}`} />
-              <span>{isBookmarked ? 'Favorit Tersimpan' : 'Bookmark Topik'}</span>
-            </button>
+            {/* Action Buttons: Tandai Selesai & Bookmark */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onToggleTopicCompletion(activeTopic.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  isTopicMarkedDone
+                    ? 'bg-emerald-50 dark:bg-[#122419] text-emerald-700 dark:text-[#34D399] border-emerald-300 dark:border-[#1E4D33] shadow-xs'
+                    : 'bg-slate-100 dark:bg-[#16161B] text-slate-700 dark:text-[#A1A1AA] border-slate-200 dark:border-[#26262E] hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#1F1F26]'
+                }`}
+                aria-label={isTopicMarkedDone ? 'Batalkan tanda selesai' : 'Tandai materi ini telah selesai dipelajari'}
+                title={isTopicMarkedDone ? 'Materi telah selesai dipelajari' : 'Tandai materi selesai'}
+              >
+                <CheckCircle2
+                  className={`w-3.5 h-3.5 ${isTopicMarkedDone ? 'text-emerald-500 dark:text-[#34D399]' : ''}`}
+                />
+                <span>{isTopicMarkedDone ? 'Selesai Dipelajari' : 'Tandai Selesai'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onToggleBookmark(activeTopic.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                  isBookmarked
+                    ? 'bg-amber-50 dark:bg-[#251E14] text-amber-700 dark:text-[#FBBF24] border-amber-300 dark:border-[#523B19] shadow-xs'
+                    : 'bg-slate-100 dark:bg-[#16161B] text-slate-700 dark:text-[#A1A1AA] border-slate-200 dark:border-[#26262E] hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#1F1F26]'
+                }`}
+                aria-label={isBookmarked ? 'Hapus dari daftar favorit' : 'Simpan topik ke daftar favorit'}
+                title={isBookmarked ? 'Tersimpan di Favorit' : 'Simpan topik ke favorit'}
+              >
+                <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-current' : ''}`} />
+                <span>{isBookmarked ? 'Favorit' : 'Bookmark'}</span>
+              </button>
+            </div>
           </div>
 
           <h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             {activeTopic.title}
           </h1>
 
-          <p className="text-sm lg:text-base text-slate-600 dark:text-[#8E8C9A] leading-relaxed max-w-3xl">
+          <p className="text-sm lg:text-base text-slate-600 dark:text-[#8A8A93] leading-relaxed max-w-3xl">
             {activeTopic.subtitle}
           </p>
         </div>
 
         {/* Conceptual Summary */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#12101B] border border-slate-200 dark:border-[#221F33] shadow-xs space-y-2">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#111114] border border-slate-200 dark:border-[#202025] shadow-xs space-y-2">
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
-            <BookOpen className="w-4 h-4 text-sky-600 dark:text-[#A78BFA]" />
+            <BookOpen className="w-4 h-4 text-sky-600 dark:text-[#38BDF8]" />
             <span>Penjelasan Konseptual</span>
           </div>
-          <p className="text-xs lg:text-sm text-slate-600 dark:text-[#8E8C9A] leading-relaxed font-sans">
+          <p className="text-xs lg:text-sm text-slate-600 dark:text-[#8A8A93] leading-relaxed font-sans">
             {activeTopic.summary}
           </p>
         </div>
@@ -493,19 +540,19 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
         {/* Concept Points */}
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-            <Info className="w-4 h-4 text-sky-600 dark:text-[#A78BFA]" />
+            <Info className="w-4 h-4 text-sky-600 dark:text-[#38BDF8]" />
             <span>Poin Pembelajaran Kunci</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {activeTopic.conceptPoints.map((point, index) => (
               <div
                 key={index}
-                className="p-3.5 rounded-xl bg-white dark:bg-[#12101B] border border-slate-200 dark:border-[#221F33] space-y-1.5 shadow-xs"
+                className="p-3.5 rounded-xl bg-white dark:bg-[#111114] border border-slate-200 dark:border-[#202025] space-y-1.5 shadow-xs"
               >
-                <h3 className="font-semibold text-xs text-sky-700 dark:text-[#A78BFA]">
+                <h3 className="font-semibold text-xs text-sky-700 dark:text-[#38BDF8]">
                   {point.title}
                 </h3>
-                <p className="text-xs text-slate-600 dark:text-[#8E8C9A] leading-relaxed font-sans">
+                <p className="text-xs text-slate-600 dark:text-[#8A8A93] leading-relaxed font-sans">
                   {point.explanation}
                 </p>
               </div>
@@ -518,28 +565,28 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
             Referensi Sintaks Dart
           </h2>
-          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-[#221F33] bg-white dark:bg-[#12101B]">
+          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-[#202025] bg-white dark:bg-[#111114]">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-[#221F33] bg-slate-50 dark:bg-[#0E0C17] text-slate-600 dark:text-[#8E8C9A]">
+                <tr className="border-b border-slate-200 dark:border-[#202025] bg-slate-50 dark:bg-[#09090B] text-slate-600 dark:text-[#8A8A93]">
                   <th className="py-2.5 px-3 font-semibold font-mono">Konsep</th>
                   <th className="py-2.5 px-3 font-semibold font-mono">Contoh Sintaks</th>
                   <th className="py-2.5 px-3 font-semibold">Penjelasan</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-[#221F33]">
+              <tbody className="divide-y divide-slate-100 dark:divide-[#202025]">
                 {activeTopic.keyProperties.map((prop, idx) => (
                   <tr
                     key={idx}
-                    className="hover:bg-slate-50 dark:hover:bg-[#161324] transition-colors"
+                    className="hover:bg-slate-50 dark:hover:bg-[#18181D] transition-colors"
                   >
-                    <td className="py-2.5 px-3 font-mono font-semibold text-sky-600 dark:text-[#A78BFA]">
+                    <td className="py-2.5 px-3 font-mono font-semibold text-sky-600 dark:text-[#38BDF8]">
                       {prop.name}
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-slate-500 dark:text-[#8E8C9A]">
+                    <td className="py-2.5 px-3 font-mono text-slate-500 dark:text-[#8A8A93]">
                       {prop.type}
                     </td>
-                    <td className="py-2.5 px-3 text-slate-700 dark:text-[#C4C2D1] leading-relaxed font-sans">
+                    <td className="py-2.5 px-3 text-slate-700 dark:text-[#D4D4D8] leading-relaxed font-sans">
                       {prop.description}
                     </td>
                   </tr>
@@ -552,8 +599,8 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
         {/* Dart Code Workspace with 3 Tabs: Referensi, Playground, & Quiz */}
         <div className="space-y-4 pt-2">
           {/* Editor Header & 3 Tabs */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-[#221F33] pb-3">
-            <div className="inline-flex p-1 bg-slate-100 dark:bg-[#12101B] border border-slate-200 dark:border-[#221F33] rounded-xl text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-[#202025] pb-3">
+            <div className="inline-flex p-1 bg-slate-100 dark:bg-[#111114] border border-slate-200 dark:border-[#202025] rounded-xl text-xs">
               <button
                 type="button"
                 role="tab"
@@ -562,7 +609,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
                   activeTab === 'quiz'
                     ? 'bg-amber-500 text-white shadow-xs font-semibold'
-                    : 'text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white'
+                    : 'text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 <Award className="w-3.5 h-3.5" />
@@ -577,8 +624,8 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                 onClick={() => setActiveTab('playground')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
                   activeTab === 'playground'
-                    ? 'bg-sky-600 dark:bg-[#7C3AED] text-white shadow-xs font-semibold'
-                    : 'text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-sky-600 dark:bg-white text-white dark:text-black shadow-xs font-semibold'
+                    : 'text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 <Terminal className="w-3.5 h-3.5" />
@@ -592,8 +639,8 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                 onClick={() => setActiveTab('reference')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
                   activeTab === 'reference'
-                    ? 'bg-white dark:bg-[#201C30] text-slate-900 dark:text-white shadow-xs font-semibold'
-                    : 'text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-white dark:bg-[#1C1C21] text-slate-900 dark:text-white shadow-xs font-semibold'
+                    : 'text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 <FileCode2 className="w-3.5 h-3.5" />
@@ -611,7 +658,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                       setQuizCode(activeTopic.challenge.starterCode);
                       setGradeResult(null);
                     }}
-                    className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-[#12101B] hover:bg-slate-200 dark:hover:bg-[#1C172E] border border-slate-200 dark:border-[#221F33] rounded-lg transition-colors"
+                    className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-[#111114] hover:bg-slate-200 dark:hover:bg-[#18181D] border border-slate-200 dark:border-[#202025] rounded-lg transition-colors"
                     title="Muat ulang kode awal kuis"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
@@ -633,7 +680,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-[#12101B] hover:bg-slate-200 dark:hover:bg-[#1C172E] border border-slate-200 dark:border-[#221F33] rounded-lg transition-colors"
+                    className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-[#111114] hover:bg-slate-200 dark:hover:bg-[#18181D] border border-slate-200 dark:border-[#202025] rounded-lg transition-colors"
                     title="Reset ke kode awal"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
@@ -643,7 +690,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                   <button
                     type="button"
                     onClick={handleRunCode}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-sky-600 dark:bg-[#7C3AED] hover:bg-sky-500 dark:hover:bg-[#6D28D9] active:scale-95 shadow-sm rounded-lg transition-all ring-1 ring-sky-400/40 dark:ring-[#9353FF]/40"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-sky-600 dark:bg-white text-white dark:text-black hover:opacity-90 active:scale-95 shadow-xs rounded-lg transition-all"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" />
                     <span>Jalankan Kode</span>
@@ -653,7 +700,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                 <button
                   type="button"
                   onClick={() => handleCopy(activeTopic.dartCode)}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-[#C4C2D1] hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-[#12101B] hover:bg-slate-200 dark:hover:bg-[#1C172E] border border-slate-200 dark:border-[#221F33] rounded-lg transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-[#D4D4D8] hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-[#111114] hover:bg-slate-200 dark:hover:bg-[#18181D] border border-slate-200 dark:border-[#202025] rounded-lg transition-colors"
                 >
                   {copied ? (
                     <>
@@ -675,7 +722,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
           {activeTab === 'quiz' && (
             <div className="space-y-4">
               {/* Challenge Instruction Card */}
-              <div className="p-4 bg-amber-50/70 dark:bg-[#1C172E] border border-amber-200 dark:border-[#3B2D5C] rounded-2xl text-xs space-y-3 shadow-xs">
+              <div className="p-4 bg-amber-50/70 dark:bg-[#16161B] border border-amber-200 dark:border-[#2A241C] rounded-2xl text-xs space-y-3 shadow-xs">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Award className="w-4 h-4 text-amber-600 dark:text-[#FBBF24]" />
@@ -683,21 +730,21 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                       Tantangan Kuis: {activeTopic.title}
                     </span>
                   </div>
-                  <span className="font-mono text-[10px] uppercase font-bold text-amber-700 dark:text-[#FBBF24] bg-amber-100 dark:bg-[#282142] px-2 py-0.5 rounded-full border border-amber-300 dark:border-[#4B3B6E]">
+                  <span className="font-mono text-[10px] uppercase font-bold text-amber-700 dark:text-[#FBBF24] bg-amber-100 dark:bg-[#251E14] px-2 py-0.5 rounded-full border border-amber-300 dark:border-[#523B19]">
                     Auto-Grading
                   </span>
                 </div>
 
-                <p className="text-slate-700 dark:text-[#C4C2D1] leading-relaxed">
+                <p className="text-slate-700 dark:text-[#D4D4D8] leading-relaxed">
                   {activeTopic.challenge.instruction}
                 </p>
 
                 {/* Expected Output Target Box */}
                 <div className="space-y-1">
-                  <span className="text-[11px] font-semibold text-slate-600 dark:text-[#8E8C9A]">
+                  <span className="text-[11px] font-semibold text-slate-600 dark:text-[#8A8A93]">
                     Target Output yang Diharapkan:
                   </span>
-                  <pre className="p-2.5 rounded-xl bg-slate-900 text-emerald-400 font-mono text-[11px] overflow-x-auto leading-relaxed border border-slate-800">
+                  <pre className="p-2.5 rounded-xl bg-slate-900 dark:bg-[#09090B] text-emerald-400 font-mono text-[11px] overflow-x-auto leading-relaxed border border-slate-800 dark:border-[#202025]">
                     <code>{activeTopic.expectedOutput}</code>
                   </pre>
                 </div>
@@ -713,7 +760,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                     <span>{showHint ? 'Sembunyikan Petunjuk' : 'Lihat Petunjuk Koding'}</span>
                   </button>
                   {showHint && (
-                    <div className="mt-2 p-2.5 rounded-xl bg-white/80 dark:bg-[#12101B] border border-amber-200 dark:border-[#3B2D5C] text-[11px] text-slate-700 dark:text-[#C4C2D1]">
+                    <div className="mt-2 p-2.5 rounded-xl bg-white/80 dark:bg-[#111114] border border-amber-200 dark:border-[#202025] text-[11px] text-slate-700 dark:text-[#D4D4D8]">
                       {activeTopic.challenge.hint}
                     </div>
                   )}
@@ -721,23 +768,23 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
               </div>
 
               {/* Quiz Code Editor */}
-              <div className="relative rounded-2xl bg-slate-950 dark:bg-[#0B0A11] border border-slate-800 dark:border-[#221F33] overflow-hidden shadow-md flex flex-col">
-                <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 dark:border-[#221F33] bg-slate-900/80 dark:bg-[#12101B] text-[11px] font-mono text-slate-400 dark:text-[#8E8C9A] shrink-0">
+              <div className="relative rounded-2xl bg-slate-950 dark:bg-[#09090B] border border-slate-800 dark:border-[#202025] overflow-hidden shadow-md flex flex-col">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 dark:border-[#202025] bg-slate-900/80 dark:bg-[#111114] text-[11px] font-mono text-slate-400 dark:text-[#8A8A93] shrink-0">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block" />
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
-                    <span className="text-slate-200 dark:text-[#F3F4F6] font-semibold">{activeTopic.id}_challenge.dart</span>
+                    <span className="text-slate-200 dark:text-[#F4F4F5] font-semibold">{activeTopic.id}_challenge.dart</span>
                   </div>
                   <span className="text-amber-400 font-semibold text-[10px]">Challenge Mode</span>
                 </div>
 
-                <div className="relative flex h-[320px] bg-slate-950 dark:bg-[#0B0A11] overflow-hidden font-mono text-xs">
+                <div className="relative flex h-[320px] bg-slate-950 dark:bg-[#09090B] overflow-hidden font-mono text-xs">
                   {/* Gutter */}
                   <div
                     ref={quizGutterRef}
                     aria-hidden="true"
-                    className="select-none py-3 bg-slate-900/60 dark:bg-[#0E0C17] border-r border-slate-800 dark:border-[#221F33] text-slate-500 dark:text-[#6C687E] text-[11px] shrink-0 w-12 overflow-hidden pointer-events-none"
+                    className="select-none py-3 bg-slate-900/60 dark:bg-[#0C0C0F] border-r border-slate-800 dark:border-[#202025] text-slate-500 dark:text-[#71717A] text-[11px] shrink-0 w-12 overflow-hidden pointer-events-none"
                   >
                     {Array.from({ length: quizLines.length }, (_, i) => {
                       const num = i + 1;
@@ -791,7 +838,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                       autoCapitalize="off"
                       autoComplete="off"
                       aria-label="Editor kode kuis Dart"
-                      className="relative z-10 w-full h-full py-3 px-3 bg-transparent text-slate-100 dark:text-[#F3F4F6] font-mono text-xs leading-6 resize-none focus:outline-none selection:bg-amber-500/30 whitespace-pre overflow-auto"
+                      className="relative z-10 w-full h-full py-3 px-3 bg-transparent text-slate-100 dark:text-[#F4F4F5] font-mono text-xs leading-6 resize-none focus:outline-none selection:bg-amber-500/30 whitespace-pre overflow-auto"
                       placeholder="// Tulis jawaban tantangan Dart Anda di sini..."
                     />
                   </div>
@@ -803,8 +850,8 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                 <div
                   className={`p-5 rounded-2xl border transition-all animate-fade-in space-y-4 ${
                     gradeResult.passed
-                      ? 'bg-emerald-50 dark:bg-[#0F2418] border-emerald-300 dark:border-[#1E4D33]'
-                      : 'bg-rose-50 dark:bg-[#251017] border-rose-300 dark:border-[#521E2C]'
+                      ? 'bg-emerald-50 dark:bg-[#0D1F15] border-emerald-300 dark:border-[#1E4D33]'
+                      : 'bg-rose-50 dark:bg-[#200F15] border-rose-300 dark:border-[#4B1E29]'
                   }`}
                 >
                   {gradeResult.passed ? (
@@ -824,9 +871,9 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                       </div>
 
                       {/* Secret Unlock Code Showcase */}
-                      <div className="p-4 rounded-xl bg-white dark:bg-[#12101B] border border-emerald-300 dark:border-[#221F33] space-y-2">
+                      <div className="p-4 rounded-xl bg-white dark:bg-[#111114] border border-emerald-300 dark:border-[#202025] space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-semibold text-slate-500 dark:text-[#8E8C9A] uppercase tracking-wider flex items-center gap-1.5">
+                          <span className="text-[11px] font-semibold text-slate-500 dark:text-[#8A8A93] uppercase tracking-wider flex items-center gap-1.5">
                             <KeyRound className="w-3.5 h-3.5 text-amber-500" />
                             <span>Kode Akses Materi Selanjutnya:</span>
                           </span>
@@ -835,8 +882,8 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-slate-50 dark:bg-[#0B0A11] border border-slate-200 dark:border-[#221F33]">
-                          <span className="font-mono text-sm sm:text-base font-extrabold tracking-wider text-slate-900 dark:text-[#F3F4F6] selection:bg-emerald-500/30">
+                        <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-slate-50 dark:bg-[#09090B] border border-slate-200 dark:border-[#202025]">
+                          <span className="font-mono text-sm sm:text-base font-extrabold tracking-wider text-slate-900 dark:text-[#F4F4F5] selection:bg-emerald-500/30">
                             {activeTopic.challenge.unlockCode}
                           </span>
                           <button
@@ -908,7 +955,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                           <span className="text-[11px] font-semibold text-rose-800 dark:text-rose-400">
                             Output yang Anda Hasilkan:
                           </span>
-                          <pre className="p-3 rounded-xl bg-white dark:bg-[#12101B] text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-[#38161F] overflow-x-auto min-h-[70px]">
+                          <pre className="p-3 rounded-xl bg-white dark:bg-[#111114] text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-[#38161F] overflow-x-auto min-h-[70px]">
                             <code>{gradeResult.actualOutput || '(Tidak ada output yang dihasilkan)'}</code>
                           </pre>
                         </div>
@@ -917,7 +964,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                           <span className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-400">
                             Output Target yang Diharapkan:
                           </span>
-                          <pre className="p-3 rounded-xl bg-white dark:bg-[#12101B] text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-[#1E4D33] overflow-x-auto min-h-[70px]">
+                          <pre className="p-3 rounded-xl bg-white dark:bg-[#111114] text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-[#1E4D33] overflow-x-auto min-h-[70px]">
                             <code>{gradeResult.expectedOutput}</code>
                           </pre>
                         </div>
@@ -932,27 +979,27 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
           {/* TAB 2: PLAYGROUND BEBAS */}
           {activeTab === 'playground' && (
             <div className="space-y-3">
-              <div className="p-3 bg-slate-100 dark:bg-[#12101B] border border-slate-300 dark:border-[#221F33] rounded-xl text-xs text-slate-700 dark:text-[#C4C2D1]">
+              <div className="p-3 bg-slate-100 dark:bg-[#111114] border border-slate-300 dark:border-[#202025] rounded-xl text-xs text-slate-700 dark:text-[#D4D4D8]">
                 <span className="font-semibold text-slate-900 dark:text-white block mb-0.5">
                   Playground Eksperimen Bebas:
                 </span>
-                <p className="text-slate-600 dark:text-[#8E8C9A] text-[11px]">
+                <p className="text-slate-600 dark:text-[#8A8A93] text-[11px]">
                   Ketik atau ubah kode Dart di bawah, lalu klik <strong>"Jalankan Kode"</strong> untuk melihat hasil output terminal di bawah editor.
                 </p>
               </div>
 
-              <div className="relative rounded-2xl bg-slate-950 dark:bg-[#0B0A11] border border-slate-800 dark:border-[#221F33] overflow-hidden shadow-md flex flex-col">
-                <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 dark:border-[#221F33] bg-slate-900/80 dark:bg-[#12101B] text-[11px] font-mono text-slate-400 dark:text-[#8E8C9A] shrink-0">
-                  <span className="text-slate-200 dark:text-[#F3F4F6]">{activeTopic.id}_playground.dart</span>
-                  <span className="text-sky-400 dark:text-[#A78BFA] font-semibold text-[10px]">Playground Mode</span>
+              <div className="relative rounded-2xl bg-slate-950 dark:bg-[#09090B] border border-slate-800 dark:border-[#202025] overflow-hidden shadow-md flex flex-col">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 dark:border-[#202025] bg-slate-900/80 dark:bg-[#111114] text-[11px] font-mono text-slate-400 dark:text-[#8A8A93] shrink-0">
+                  <span className="text-slate-200 dark:text-[#F4F4F5]">{activeTopic.id}_playground.dart</span>
+                  <span className="text-sky-400 dark:text-[#38BDF8] font-semibold text-[10px]">Playground Mode</span>
                 </div>
 
-                <div className="relative flex h-[300px] bg-slate-950 dark:bg-[#0B0A11] overflow-hidden font-mono text-xs">
+                <div className="relative flex h-[300px] bg-slate-950 dark:bg-[#09090B] overflow-hidden font-mono text-xs">
                   {/* Gutter */}
                   <div
                     ref={gutterRef}
                     aria-hidden="true"
-                    className="select-none py-3 bg-slate-900/60 dark:bg-[#0E0C17] border-r border-slate-800 dark:border-[#221F33] text-slate-500 dark:text-[#6C687E] text-[11px] shrink-0 w-12 overflow-hidden pointer-events-none"
+                    className="select-none py-3 bg-slate-900/60 dark:bg-[#0C0C0F] border-r border-slate-800 dark:border-[#202025] text-slate-500 dark:text-[#71717A] text-[11px] shrink-0 w-12 overflow-hidden pointer-events-none"
                   >
                     {Array.from({ length: playgroundLines.length }, (_, i) => (
                       <div key={i + 1} className="h-6 leading-6 flex items-center justify-end px-2">
@@ -977,20 +1024,20 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                       autoCapitalize="off"
                       autoComplete="off"
                       aria-label="Editor kode Dart"
-                      className="relative z-10 w-full h-full py-3 px-3 bg-transparent text-slate-100 dark:text-[#F3F4F6] font-mono text-xs leading-6 resize-none focus:outline-none selection:bg-sky-500/30 selection:dark:bg-[#7C3AED]/30 whitespace-pre overflow-auto"
+                      className="relative z-10 w-full h-full py-3 px-3 bg-transparent text-slate-100 dark:text-[#F4F4F5] font-mono text-xs leading-6 resize-none focus:outline-none selection:bg-sky-500/30 whitespace-pre overflow-auto"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Terminal Console Output */}
-              <div className="rounded-2xl bg-slate-950 dark:bg-[#0B0A11] border border-slate-800 dark:border-[#221F33] overflow-hidden shadow-xs">
-                <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 dark:border-[#221F33] bg-slate-900/60 dark:bg-[#12101B] text-[11px] font-mono text-slate-400 dark:text-[#8E8C9A]">
+              <div className="rounded-2xl bg-slate-950 dark:bg-[#09090B] border border-slate-800 dark:border-[#202025] overflow-hidden shadow-xs">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 dark:border-[#202025] bg-slate-900/60 dark:bg-[#111114] text-[11px] font-mono text-slate-400 dark:text-[#8A8A93]">
                   <div className="flex items-center gap-2">
-                    <Terminal className="w-3.5 h-3.5 text-sky-400 dark:text-[#A78BFA]" />
+                    <Terminal className="w-3.5 h-3.5 text-sky-400 dark:text-[#38BDF8]" />
                     <span className="text-slate-300 dark:text-white font-semibold">Terminal Output Console</span>
                   </div>
-                  <span className="text-slate-500 dark:text-[#6C687E] font-mono">$ dart run</span>
+                  <span className="text-slate-500 dark:text-[#71717A] font-mono">$ dart run</span>
                 </div>
 
                 <div className="p-4 font-mono text-xs overflow-x-auto min-h-[90px]">
@@ -1027,12 +1074,12 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
 
           {/* TAB 3: KODE ASLI (REFERENSI) */}
           {activeTab === 'reference' && (
-            <div className="relative rounded-2xl bg-slate-900 dark:bg-[#0B0A11] border border-slate-800 dark:border-[#221F33] overflow-hidden shadow-xs">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 dark:border-[#221F33] bg-slate-950/60 dark:bg-[#12101B] text-[11px] font-mono text-slate-400 dark:text-[#8E8C9A]">
+            <div className="relative rounded-2xl bg-slate-900 dark:bg-[#09090B] border border-slate-800 dark:border-[#202025] overflow-hidden shadow-xs">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 dark:border-[#202025] bg-slate-950/60 dark:bg-[#111114] text-[11px] font-mono text-slate-400 dark:text-[#8A8A93]">
                 <span>{activeTopic.id}.dart (Read-only)</span>
-                <span className="text-sky-400 dark:text-[#A78BFA] font-semibold">Dart SDK</span>
+                <span className="text-sky-400 dark:text-[#38BDF8] font-semibold">Dart SDK</span>
               </div>
-              <pre className="p-4 overflow-x-auto text-xs font-mono text-slate-200 dark:text-[#F3F4F6] leading-relaxed selection:bg-sky-500/20 selection:dark:bg-[#7C3AED]/30 max-h-[360px] overflow-y-auto">
+              <pre className="p-4 overflow-x-auto text-xs font-mono text-slate-200 dark:text-[#F4F4F5] leading-relaxed selection:bg-sky-500/20 max-h-[360px] overflow-y-auto">
                 <code>{activeTopic.dartCode}</code>
               </pre>
             </div>
@@ -1042,9 +1089,9 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
 
       {/* Manual Unlock Modal Dialog */}
       {showUnlockModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in">
-          <div className="w-full max-w-md bg-white dark:bg-[#12101B] border border-slate-200 dark:border-[#221F33] rounded-3xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#221F33] pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-md bg-white dark:bg-[#111114] border border-slate-200 dark:border-[#202025] rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#202025] pb-3">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-[#251E14] text-amber-600 dark:text-[#FBBF24] flex items-center justify-center">
                   <KeyRound className="w-4 h-4" />
@@ -1066,7 +1113,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
               </button>
             </div>
 
-            <p className="text-xs text-slate-600 dark:text-[#8E8C9A] leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-[#8A8A93] leading-relaxed">
               Materi lanjutan terkunci. Selesaikan kuis pada materi sebelumnya untuk mendapatkan kode akses otomatis, atau masukkan kode akses yang telah Anda miliki di bawah ini:
             </p>
 
@@ -1081,7 +1128,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                   value={manualCodeInput}
                   onChange={(e) => setManualCodeInput(e.target.value)}
                   placeholder="Contoh: FREE-DART-FUNC-201"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-[#0B0A11] border border-slate-300 dark:border-[#221F33] text-slate-900 dark:text-white font-mono text-xs uppercase placeholder-slate-400 focus:outline-none focus:border-amber-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-[#09090B] border border-slate-300 dark:border-[#202025] text-slate-900 dark:text-white font-mono text-xs uppercase placeholder-slate-400 focus:outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -1101,7 +1148,7 @@ export const DartWorkspace: React.FC<DartWorkspaceProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowUnlockModal(false)}
-                  className="px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-[#8E8C9A] hover:bg-slate-100 dark:hover:bg-[#1C172E]"
+                  className="px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-[#8A8A93] hover:bg-slate-100 dark:hover:bg-[#18181D]"
                 >
                   Batal
                 </button>

@@ -45,9 +45,12 @@ export function evaluateFlutterChallenge(
           /fontSize:\s*(?:1[4-9]|[2-9][0-9])/i.test(code);
         break;
 
+      case 'element-color':
       case 'text-style-color':
         passed =
           Boolean(state.textColor) ||
+          Boolean(state.appBarColor) ||
+          /Colors\.blueAccent/i.test(code) ||
           /TextStyle\s*\([^)]*color:\s*(?:Colors\.[a-zA-Z]+|Color\(0x[0-9a-fA-F]+\))/i.test(code);
         break;
 

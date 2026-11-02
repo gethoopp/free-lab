@@ -125,8 +125,8 @@ class MyApp extends StatelessWidget {
     },
     challenge: {
       instruction:
-        'Lengkapi kode widget di bawah: tambahkan AppBar dengan judul "Halo Flutter", lalu di bagian body tambahkan widget Center dengan Text bertuliskan "Saya Belajar Widget di FreeLab", ukuran font 18 (fontSize: 18), dan warna Colors.blueAccent.',
-      hint: 'Gunakan properti title: Text("Halo Flutter") pada AppBar, serta TextStyle(fontSize: 18, color: Colors.blueAccent) pada Text.',
+        'Lengkapi kode widget di bawah: tambahkan AppBar dengan judul Text, lalu di bagian body tambahkan widget Center dengan child Text, ukuran font 18 (fontSize: 18), dan warna Colors.blueAccent (pada AppBar atau TextStyle).',
+      hint: 'Gunakan properti title: const Text(...) dan backgroundColor: Colors.blueAccent pada AppBar, atau gunakan TextStyle(fontSize: 18, color: Colors.blueAccent) pada Text.',
       starterCode: `import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
@@ -139,11 +139,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        // TODO 1: Tambahkan AppBar dengan judul Text('Halo Flutter'):
+        // TODO 1: Tambahkan AppBar dengan judul Text dan warna Colors.blueAccent:
 
 
-        // TODO 2: Tambahkan body Center dengan child Text('Saya Belajar Widget di FreeLab')
-        // dan TextStyle(fontSize: 18, color: Colors.blueAccent):
+        // TODO 2: Tambahkan body Center dengan child Text dan TextStyle fontSize 18:
 
       ),
     );
@@ -155,12 +154,12 @@ class MyApp extends StatelessWidget {
       criteria: [
         {
           id: 'appbar-title',
-          label: 'AppBar dengan judul Text("Halo Flutter")',
+          label: 'AppBar dengan judul Text',
           description: 'Memiliki AppBar dengan title terdefinisi.',
         },
         {
           id: 'body-text',
-          label: 'Body Center dengan Text("Saya Belajar Widget di FreeLab")',
+          label: 'Body Center dengan child Text',
           description: 'Memiliki Text di dalam Center.',
         },
         {
@@ -170,8 +169,8 @@ class MyApp extends StatelessWidget {
         },
         {
           id: 'text-style-color',
-          label: 'Warna teks Colors.blueAccent',
-          description: 'Memiliki TextStyle dengan warna kustom.',
+          label: 'Warna Colors.blueAccent (pada AppBar atau TextStyle)',
+          description: 'Memiliki konfigurasi warna Colors.blueAccent.',
         },
       ],
     },

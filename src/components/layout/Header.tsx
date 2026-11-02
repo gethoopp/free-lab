@@ -1,5 +1,5 @@
 import React from 'react';
-import { Moon, Sun, Smartphone, BookOpen, Layers, Terminal, Home } from 'lucide-react';
+import { Moon, Sun, Smartphone, BookOpen, Layers, Terminal, Home, Map } from 'lucide-react';
 
 interface HeaderProps {
   currentView: 'dashboard' | 'flutter' | 'dart';
@@ -23,7 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   onMobileViewChange,
 }) => {
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-[#221F33] bg-white/90 dark:bg-[#08070C]/90 backdrop-blur-md px-4 lg:px-8 py-3 transition-colors">
+    <header className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-[#202025] bg-white/90 dark:bg-[#09090B]/90 backdrop-blur-md px-4 lg:px-8 py-3 transition-colors">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Brand Identity: FreeLab */}
         <div className="flex items-center gap-3 shrink-0">
@@ -33,19 +33,19 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-2.5 text-left focus:outline-none group"
             title="Kembali ke Dashboard Utama FreeLab"
           >
-            <div className="w-9 h-9 rounded-xl bg-sky-600 dark:bg-[#7C3AED] group-hover:bg-sky-500 dark:group-hover:bg-[#6D28D9] flex items-center justify-center text-white shadow-sm ring-1 ring-sky-400/30 dark:ring-[#9353FF]/30 transition-colors">
+            <div className="w-9 h-9 rounded-xl bg-sky-600 dark:bg-[#0284C7] group-hover:bg-sky-500 dark:group-hover:bg-[#0369A1] flex items-center justify-center text-white shadow-sm ring-1 ring-sky-400/30 dark:ring-[#38BDF8]/30 transition-colors">
               <Layers className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-[#A78BFA] transition-colors">
+                <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-[#38BDF8] transition-colors">
                   FreeLab
                 </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-sky-100 dark:bg-[#1C172E] text-sky-700 dark:text-[#C4B5FD] border border-sky-300 dark:border-[#3B2D5C] font-semibold">
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-sky-100 dark:bg-[#16161B] text-sky-700 dark:text-[#A1A1AA] border border-sky-300 dark:border-[#26262E] font-semibold">
                   v3.2
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-[#8E8C9A] hidden sm:block">
+              <p className="text-[11px] text-slate-500 dark:text-[#8A8A93] hidden sm:block">
                 Belajar Dart &amp; Flutter Interaktif
               </p>
             </div>
@@ -55,15 +55,15 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Center: Track Switcher Navigation */}
         <nav
           aria-label="Pilihan Jalur Belajar"
-          className="hidden md:flex items-center p-1 bg-slate-100 dark:bg-[#12101B] border border-slate-200 dark:border-[#221F33] rounded-xl text-xs"
+          className="hidden md:flex items-center p-1 bg-slate-100 dark:bg-[#111114] border border-slate-200 dark:border-[#202025] rounded-xl text-xs"
         >
           <button
             type="button"
             onClick={() => onNavigate('dashboard')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
               currentView === 'dashboard'
-                ? 'bg-white dark:bg-[#201C30] text-slate-900 dark:text-white shadow-xs font-semibold'
-                : 'text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-white dark:bg-[#1C1C21] text-slate-900 dark:text-white shadow-xs font-semibold'
+                : 'text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Home className="w-3.5 h-3.5" />
@@ -72,11 +72,26 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             type="button"
+            onClick={() => {
+              onNavigate('dashboard');
+              setTimeout(() => {
+                const el = document.getElementById('roadmap-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }, 60);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white"
+          >
+            <Map className="w-3.5 h-3.5" />
+            <span>Roadmap</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => onNavigate('dart')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
               currentView === 'dart'
-                ? 'bg-sky-600 dark:bg-[#7C3AED] text-white shadow-xs font-semibold'
-                : 'text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-sky-600 dark:bg-white text-white dark:text-black shadow-xs font-semibold'
+                : 'text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Terminal className="w-3.5 h-3.5" />
@@ -88,8 +103,8 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => onNavigate('flutter')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
               currentView === 'flutter'
-                ? 'bg-indigo-600 dark:bg-[#4F46E5] text-white shadow-xs font-semibold'
-                : 'text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-indigo-600 dark:bg-[#0284C7] text-white shadow-xs font-semibold'
+                : 'text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Smartphone className="w-3.5 h-3.5" />
@@ -110,7 +125,7 @@ export const Header: React.FC<HeaderProps> = ({
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder="Cari widget (Row, State, dll)..."
-                className="w-full text-xs py-1.5 pl-3 pr-8 rounded-xl bg-slate-100 dark:bg-[#12101B] border border-slate-200 dark:border-[#221F33] text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-[#6C697B] focus:outline-none focus:border-sky-500 dark:focus:border-[#7C3AED] transition-colors"
+                className="w-full text-xs py-1.5 pl-3 pr-8 rounded-xl bg-slate-100 dark:bg-[#111114] border border-slate-200 dark:border-[#202025] text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-[#71717A] focus:outline-none focus:border-sky-500 dark:focus:border-[#38BDF8] transition-colors"
               />
               {searchQuery && (
                 <button
@@ -130,7 +145,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-2 shrink-0">
           {/* Mobile Screen Segmented Switch (Only in Flutter View) */}
           {currentView === 'flutter' && (
-            <div className="flex lg:hidden bg-slate-100 dark:bg-[#12101B] border border-slate-200 dark:border-[#221F33] rounded-lg p-0.5 text-xs">
+            <div className="flex lg:hidden bg-slate-100 dark:bg-[#111114] border border-slate-200 dark:border-[#202025] rounded-lg p-0.5 text-xs">
               <button
                 type="button"
                 role="tab"
@@ -138,8 +153,8 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => onMobileViewChange('content')}
                 className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md font-medium transition-colors ${
                   mobileView === 'content'
-                    ? 'bg-sky-600 dark:bg-[#7C3AED] text-white shadow-sm'
-                    : 'text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-sky-600 dark:bg-[#0284C7] text-white shadow-sm'
+                    : 'text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
@@ -152,8 +167,8 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => onMobileViewChange('emulator')}
                 className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md font-medium transition-colors ${
                   mobileView === 'emulator'
-                    ? 'bg-sky-600 dark:bg-[#7C3AED] text-white shadow-sm'
-                    : 'text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-sky-600 dark:bg-[#0284C7] text-white shadow-sm'
+                    : 'text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 <Smartphone className="w-3.5 h-3.5" aria-hidden="true" />
@@ -166,7 +181,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={onToggleTheme}
-            className="p-2 rounded-xl border border-slate-200 dark:border-[#221F33] bg-slate-100 dark:bg-[#12101B] hover:bg-slate-200 dark:hover:bg-[#1C172E] text-slate-700 dark:text-[#C4B5FD] transition-colors"
+            className="p-2 rounded-xl border border-slate-200 dark:border-[#202025] bg-slate-100 dark:bg-[#111114] hover:bg-slate-200 dark:hover:bg-[#18181D] text-slate-700 dark:text-[#D4D4D8] transition-colors"
             title={`Beralih ke mode ${theme === 'dark' ? 'Terang (Light)' : 'Gelap (Dark)'}`}
             aria-label={`Beralih ke mode ${theme === 'dark' ? 'Terang' : 'Gelap'}`}
           >

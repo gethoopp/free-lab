@@ -107,7 +107,7 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
     <div className="flex flex-col items-center w-full max-w-sm mx-auto">
       {/* Emulator Mode Selector & Controls */}
       <div className="flex items-center justify-between w-full mb-3 px-1 text-xs">
-        <div className="inline-flex p-1 bg-slate-100 dark:bg-[#12101B] border border-slate-200 dark:border-[#221F33] rounded-xl">
+        <div className="inline-flex p-1 bg-slate-100 dark:bg-[#111114] border border-slate-200 dark:border-[#202025] rounded-xl">
           <button
             type="button"
             role="tab"
@@ -115,8 +115,8 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
             onClick={() => setViewMode('app')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all font-medium ${
               viewMode === 'app'
-                ? 'bg-sky-600 dark:bg-[#7C3AED] text-white shadow-xs'
-                : 'text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-slate-900 dark:bg-white text-white dark:text-black shadow-xs font-semibold'
+                : 'text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Smartphone className="w-3.5 h-3.5" aria-hidden="true" />
@@ -129,8 +129,8 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
             onClick={() => setViewMode('tree')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all font-medium ${
               viewMode === 'tree'
-                ? 'bg-sky-600 dark:bg-[#7C3AED] text-white shadow-xs'
-                : 'text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-slate-900 dark:bg-white text-white dark:text-black shadow-xs font-semibold'
+                : 'text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Layers className="w-3.5 h-3.5" aria-hidden="true" />
@@ -141,7 +141,7 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
         <button
           type="button"
           onClick={onReset}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 text-slate-600 dark:text-[#8E8C9A] hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-[#12101B] hover:bg-slate-200 dark:hover:bg-[#1C172E] border border-slate-200 dark:border-[#221F33] rounded-lg transition-colors font-medium"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-slate-600 dark:text-[#8A8A93] hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-[#111114] hover:bg-slate-200 dark:hover:bg-[#18181D] border border-slate-200 dark:border-[#202025] rounded-lg transition-colors font-medium"
           title="Reset interaksi emulator ke awal"
         >
           <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
@@ -150,16 +150,16 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
       </div>
 
       {/* Realistic Smartphone Chassis */}
-      <div className="relative w-[340px] h-[670px] bg-slate-950 dark:bg-[#0B0A11] rounded-[48px] p-3.5 border-4 border-slate-800 dark:border-[#221F33] shadow-2xl ring-1 ring-slate-700/50 dark:ring-[#2A253D] flex flex-col select-none">
+      <div className="relative w-[340px] h-[670px] bg-slate-950 dark:bg-[#050507] rounded-[48px] p-3.5 border-4 border-slate-800 dark:border-[#202025] shadow-2xl ring-1 ring-slate-700/50 dark:ring-[#27272A] flex flex-col select-none">
         {/* Hardware Buttons Simulated on Sides */}
-        <div className="absolute -left-[7px] top-24 w-1 h-12 bg-slate-700 dark:bg-[#2A253D] rounded-l-md" />
-        <div className="absolute -left-[7px] top-40 w-1 h-12 bg-slate-700 dark:bg-[#2A253D] rounded-l-md" />
-        <div className="absolute -right-[7px] top-28 w-1 h-16 bg-slate-700 dark:bg-[#2A253D] rounded-r-md" />
+        <div className="absolute -left-[7px] top-24 w-1 h-12 bg-slate-700 dark:bg-[#27272A] rounded-l-md" />
+        <div className="absolute -left-[7px] top-40 w-1 h-12 bg-slate-700 dark:bg-[#27272A] rounded-l-md" />
+        <div className="absolute -right-[7px] top-28 w-1 h-16 bg-slate-700 dark:bg-[#27272A] rounded-r-md" />
 
         {/* Screen Bezel & Dynamic Display Container */}
-        <div className="relative flex-1 w-full bg-slate-900 dark:bg-[#0E0C17] rounded-[38px] overflow-hidden flex flex-col border border-slate-800/80 dark:border-[#221F33]">
+        <div className="relative flex-1 w-full bg-slate-900 dark:bg-[#09090B] rounded-[38px] overflow-hidden flex flex-col border border-slate-800/80 dark:border-[#202025]">
           {/* Top Status Bar with Punch-hole Camera */}
-          <div className="h-10 px-6 flex items-center justify-between text-[11px] font-semibold text-slate-300 bg-slate-950/90 z-20 shrink-0">
+          <div className="h-10 px-6 flex items-center justify-between text-[11px] font-semibold text-slate-300 bg-slate-950/90 dark:bg-[#070709] z-20 shrink-0">
             {/* Clock */}
             <span className="tracking-tight">{currentTime}</span>
 
@@ -177,10 +177,10 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
           </div>
 
           {/* SCREEN CONTENT AREA */}
-          <div className="relative flex-1 flex flex-col bg-slate-950 text-slate-100 overflow-hidden">
+          <div className="relative flex-1 flex flex-col bg-slate-950 dark:bg-[#09090B] text-slate-100 overflow-hidden">
             {/* Hot Reload Subtle Notification Banner */}
             {hotReloadNotice && (
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-40 bg-sky-600 text-white font-mono text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-lg border border-sky-400 flex items-center gap-1 animate-fade-in">
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-40 bg-sky-600 dark:bg-[#0284C7] text-white font-mono text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-lg border border-sky-400 dark:border-[#38BDF8] flex items-center gap-1 animate-fade-in">
                 <Zap className="w-3 h-3 fill-current" />
                 <span>Hot Reload Selesai</span>
               </div>
@@ -238,7 +238,7 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
               </div>
             ) : (
               /* Simulated Flutter Native App View */
-              <div className="flex-1 flex flex-col bg-slate-950 overflow-y-auto">
+              <div className="flex-1 flex flex-col bg-slate-950 dark:bg-[#09090B] overflow-y-auto">
                 {/* Flutter Simulated AppBar */}
                 <div
                   className="h-14 px-4 text-white flex items-center justify-between shadow-md shrink-0 transition-colors duration-200"
@@ -268,13 +268,13 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                   {topic.id === 'what-is-widget' && (
                     <div className="w-full flex flex-col items-center justify-center space-y-4">
                       <div
-                        className="p-5 border-2 border-dashed border-sky-400/50 rounded-2xl bg-sky-950/30 w-full transition-all duration-300"
+                        className="p-5 border-2 border-dashed border-sky-400/50 rounded-2xl bg-sky-950/30 dark:bg-[#111114] w-full transition-all duration-300"
                         style={{
                           borderRadius: `${state.containerRadius}px`,
                           padding: `${state.containerPadding}px`,
                         }}
                       >
-                        <span className="text-[10px] uppercase tracking-wider text-sky-400 font-mono block mb-1.5 text-center">
+                        <span className="text-[10px] uppercase tracking-wider text-sky-400 dark:text-[#38BDF8] font-mono block mb-1.5 text-center">
                           Widget: Center &gt; Text
                         </span>
                         <p
@@ -290,12 +290,12 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                         </p>
                       </div>
 
-                      <div className="bg-slate-900 dark:bg-[#12101B] p-3 rounded-xl border border-slate-800 dark:border-[#221F33] text-left w-full text-xs space-y-1.5">
-                        <div className="flex items-center gap-2 text-sky-400 dark:text-[#A78BFA] font-semibold">
+                      <div className="bg-slate-900 dark:bg-[#111114] p-3 rounded-xl border border-slate-800 dark:border-[#202025] text-left w-full text-xs space-y-1.5">
+                        <div className="flex items-center gap-2 text-sky-400 dark:text-[#38BDF8] font-semibold">
                           <Sparkles className="w-3.5 h-3.5" />
                           <span>Hierarki Dasar:</span>
                         </div>
-                        <p className="text-slate-400 dark:text-[#8E8C9A] text-[11px] font-mono leading-relaxed">
+                        <p className="text-slate-400 dark:text-[#8A8A93] text-[11px] font-mono leading-relaxed">
                           MaterialApp ➔ Scaffold ➔ AppBar + Center ➔ Text
                         </p>
                       </div>
@@ -305,14 +305,14 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                   {/* Topic 2: Stateless vs Stateful (Interactive Counter) */}
                   {topic.id === 'stateless-vs-stateful' && (
                     <div className="w-full flex flex-col items-center justify-center space-y-6 text-center">
-                      <div className="bg-slate-900 dark:bg-[#12101B] border border-slate-800 dark:border-[#221F33] rounded-2xl p-6 w-full shadow-lg">
-                        <span className="text-xs text-slate-400 dark:text-[#8E8C9A] block mb-1">
+                      <div className="bg-slate-900 dark:bg-[#111114] border border-slate-800 dark:border-[#202025] rounded-2xl p-6 w-full shadow-lg">
+                        <span className="text-xs text-slate-400 dark:text-[#8A8A93] block mb-1">
                           State internal counter:
                         </span>
-                        <span className="text-5xl font-mono font-extrabold text-sky-400 dark:text-[#A78BFA]">
+                        <span className="text-5xl font-mono font-extrabold text-sky-400 dark:text-[#38BDF8]">
                           {state.counter}
                         </span>
-                        <p className="text-[11px] text-slate-500 dark:text-[#6C687E] mt-2">
+                        <p className="text-[11px] text-slate-500 dark:text-[#71717A] mt-2">
                           setState() dipanggil saat tombol ditekan
                         </p>
                       </div>
@@ -323,7 +323,7 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                           onClick={() =>
                             onUpdateState({ counter: Math.max(0, state.counter - 1) })
                           }
-                          className="w-12 h-12 rounded-full bg-slate-800 dark:bg-[#1C172E] hover:bg-slate-700 dark:hover:bg-[#282142] text-white flex items-center justify-center border border-slate-700 dark:border-[#3B2D5C] shadow active:scale-95 transition-transform"
+                          className="w-12 h-12 rounded-full bg-slate-800 dark:bg-[#18181D] hover:bg-slate-700 dark:hover:bg-[#222228] text-white flex items-center justify-center border border-slate-700 dark:border-[#26262E] shadow active:scale-95 transition-transform"
                           aria-label="Kurangi counter"
                         >
                           <Minus className="w-5 h-5" />
@@ -332,7 +332,7 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                         <button
                           type="button"
                           onClick={() => onUpdateState({ counter: state.counter + 1 })}
-                          className="w-14 h-14 rounded-full bg-sky-600 dark:bg-[#7C3AED] hover:bg-sky-500 dark:hover:bg-[#6D28D9] text-white flex items-center justify-center shadow-lg active:scale-95 transition-transform ring-4 ring-sky-600/30 dark:ring-[#9353FF]/40"
+                          className="w-14 h-14 rounded-full bg-sky-600 dark:bg-[#0284C7] hover:bg-sky-500 dark:hover:bg-[#0369A1] text-white flex items-center justify-center shadow-lg active:scale-95 transition-transform ring-4 ring-sky-600/30 dark:ring-[#38BDF8]/30"
                           aria-label="Tambah counter"
                         >
                           <Plus className="w-6 h-6" />
@@ -367,7 +367,7 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                         </span>
                       </div>
 
-                      <div className="text-[11px] font-mono text-slate-400 dark:text-[#8E8C9A] bg-slate-900/90 dark:bg-[#12101B] px-3 py-1.5 rounded-lg border border-slate-800 dark:border-[#221F33] text-center">
+                      <div className="text-[11px] font-mono text-slate-400 dark:text-[#8A8A93] bg-slate-900/90 dark:bg-[#111114] px-3 py-1.5 rounded-lg border border-slate-800 dark:border-[#202025] text-center">
                         radius: {state.containerRadius}px | padding: {state.containerPadding}px
                       </div>
                     </div>
@@ -377,7 +377,7 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                   {topic.id === 'row-and-column' && (
                     <div className="w-full h-full flex flex-col justify-center items-center py-2">
                       <div
-                        className={`w-full p-3 bg-slate-900 dark:bg-[#12101B] border border-slate-800 dark:border-[#221F33] rounded-2xl min-h-[220px] flex ${
+                        className={`w-full p-3 bg-slate-900 dark:bg-[#111114] border border-slate-800 dark:border-[#202025] rounded-2xl min-h-[220px] flex ${
                           state.flexDirection === 'row' ? 'flex-row' : 'flex-col'
                         } ${
                           state.mainAxisAlignment === 'center'
@@ -406,7 +406,7 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                         </div>
                       </div>
 
-                      <span className="text-[10px] font-mono text-slate-400 dark:text-[#8E8C9A] mt-2">
+                      <span className="text-[10px] font-mono text-slate-400 dark:text-[#8A8A93] mt-2">
                         {state.flexDirection.toUpperCase()} • mainAxis: {state.mainAxisAlignment}
                       </span>
                     </div>
@@ -415,7 +415,7 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                   {/* Topic 5: Stack & Positioned */}
                   {topic.id === 'stack-positioned' && (
                     <div className="w-full flex items-center justify-center">
-                      <div className="relative w-64 h-40 bg-gradient-to-br from-sky-700 to-sky-950 dark:from-[#5B21B6] dark:to-[#181126] rounded-2xl p-4 shadow-xl border border-sky-600/40 dark:border-[#7C3AED]/40 flex flex-col justify-end">
+                      <div className="relative w-64 h-40 bg-gradient-to-br from-sky-700 to-sky-950 dark:from-[#0369A1] dark:to-[#082F49] rounded-2xl p-4 shadow-xl border border-sky-600/40 dark:border-[#0284C7]/40 flex flex-col justify-end">
                         {/* Positioned Badge on Top Right */}
                         <div className="absolute top-3 right-3 bg-amber-400 text-slate-950 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md">
                           {state.customBadgeText || 'PRO'}
@@ -464,14 +464,14 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                       <button
                         type="button"
                         onClick={handleButtonClick}
-                        className="w-full py-2.5 px-4 bg-transparent hover:bg-slate-900 dark:hover:bg-[#12101B] text-sky-400 dark:text-[#A78BFA] border border-sky-500 dark:border-[#7C3AED] font-medium rounded-xl transition-all"
+                        className="w-full py-2.5 px-4 bg-transparent hover:bg-slate-900 dark:hover:bg-[#18181D] text-sky-400 dark:text-[#38BDF8] border border-sky-500 dark:border-[#0284C7] font-medium rounded-xl transition-all"
                       >
                         OutlinedButton
                       </button>
 
-                      <div className="text-center text-xs text-slate-400 dark:text-[#8E8C9A]">
+                      <div className="text-center text-xs text-slate-400 dark:text-[#8A8A93]">
                         Total klik:{' '}
-                        <span className="font-bold text-sky-400 dark:text-[#A78BFA]">{state.buttonClicks}</span> kali
+                        <span className="font-bold text-sky-400 dark:text-[#38BDF8]">{state.buttonClicks}</span> kali
                       </div>
                     </div>
                   )}
@@ -482,7 +482,7 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                       <div className="space-y-1">
                         <label
                           htmlFor="emulator-input"
-                          className="text-[11px] font-medium text-slate-400"
+                          className="text-[11px] font-medium text-slate-400 dark:text-[#8A8A93]"
                         >
                           {displayInputLabel}
                         </label>
@@ -492,13 +492,13 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                           value={state.inputText}
                           onChange={(e) => onUpdateState({ inputText: e.target.value })}
                           placeholder="Masukkan teks nama..."
-                          className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
+                          className="w-full px-3 py-2 bg-slate-900 dark:bg-[#111114] border border-slate-700 dark:border-[#26262E] rounded-xl text-sm text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                         />
                       </div>
 
-                      <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-xs">
-                        <span className="text-slate-400 block mb-0.5">Teks yang dihasilkan:</span>
-                        <p className="font-semibold text-sky-300 break-words">
+                      <div className="p-3 bg-slate-900/80 dark:bg-[#111114] rounded-xl border border-slate-800 dark:border-[#202025] text-xs">
+                        <span className="text-slate-400 dark:text-[#8A8A93] block mb-0.5">Teks yang dihasilkan:</span>
+                        <p className="font-semibold text-sky-300 dark:text-[#38BDF8] break-words">
                           {state.inputText ? `Halo, ${state.inputText}!` : '(Belum ada input)'}
                         </p>
                       </div>
@@ -508,12 +508,12 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                   {/* Topic 8: Switch & Slider */}
                   {topic.id === 'switch-and-slider' && (
                     <div className="w-full space-y-4">
-                      <div className="flex items-center justify-between p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                      <div className="flex items-center justify-between p-3 bg-slate-900 dark:bg-[#111114] border border-slate-800 dark:border-[#202025] rounded-xl">
                         <div>
                           <span className="text-xs font-semibold text-slate-200 block">
                             SwitchListTile
                           </span>
-                          <span className="text-[10px] text-slate-400">
+                          <span className="text-[10px] text-slate-400 dark:text-[#8A8A93]">
                             Status: {state.isSwitchOn ? 'Aktif (ON)' : 'Mati (OFF)'}
                           </span>
                         </div>
@@ -523,20 +523,20 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                           aria-checked={state.isSwitchOn}
                           onClick={() => onUpdateState({ isSwitchOn: !state.isSwitchOn })}
                           className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
-                            state.isSwitchOn ? 'bg-sky-600 justify-end' : 'bg-slate-700 justify-start'
+                            state.isSwitchOn ? 'bg-sky-600 justify-end' : 'bg-slate-700 dark:bg-[#27272A] justify-start'
                           }`}
                         >
                           <div className="bg-white w-4 h-4 rounded-full shadow-md" />
                         </button>
                       </div>
 
-                      <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-2">
+                      <div className="p-3 bg-slate-900 dark:bg-[#111114] border border-slate-800 dark:border-[#202025] rounded-xl space-y-2">
                         <div className="flex items-center justify-between text-xs">
                           <span className="font-semibold text-slate-300 flex items-center gap-1.5">
-                            <Volume2 className="w-3.5 h-3.5 text-sky-400" />
+                            <Volume2 className="w-3.5 h-3.5 text-sky-400 dark:text-[#38BDF8]" />
                             Slider Volume
                           </span>
-                          <span className="font-mono text-sky-400 font-bold">
+                          <span className="font-mono text-sky-400 dark:text-[#38BDF8] font-bold">
                             {state.sliderValue}%
                           </span>
                         </div>
@@ -575,10 +575,10 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                         {state.listItems.map((item, idx) => (
                           <div
                             key={idx}
-                            className="flex items-center justify-between p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs"
+                            className="flex items-center justify-between p-2.5 bg-slate-900 dark:bg-[#111114] border border-slate-800 dark:border-[#202025] rounded-xl text-xs"
                           >
                             <div className="flex items-center gap-2 overflow-hidden">
-                              <div className="w-5 h-5 rounded-full bg-sky-600/30 text-sky-400 flex items-center justify-center font-bold text-[10px] shrink-0">
+                              <div className="w-5 h-5 rounded-full bg-sky-600/30 text-sky-400 dark:text-[#38BDF8] flex items-center justify-center font-bold text-[10px] shrink-0">
                                 {idx + 1}
                               </div>
                               <span className="truncate text-slate-200">{item}</span>
@@ -618,7 +618,7 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
                     <button
                       type="button"
                       onClick={() => onUpdateState({ counter: state.counter + 1 })}
-                      className="w-12 h-12 bg-sky-600 hover:bg-sky-500 text-white rounded-2xl shadow-xl flex items-center justify-center ring-2 ring-sky-400/40 active:scale-95 transition-transform"
+                      className="w-12 h-12 bg-sky-600 dark:bg-[#0284C7] hover:bg-sky-500 dark:hover:bg-[#0369A1] text-white rounded-2xl shadow-xl flex items-center justify-center ring-2 ring-sky-400/40 dark:ring-[#38BDF8]/40 active:scale-95 transition-transform"
                       title="FloatingActionButton: Tambah Counter"
                       aria-label="Floating Action Button Tambah Counter"
                     >
@@ -631,8 +631,8 @@ export const PhoneEmulator: React.FC<PhoneEmulatorProps> = ({
           </div>
 
           {/* Bottom Gesture Bar Navigation Pill */}
-          <div className="h-6 bg-slate-950 flex items-center justify-center shrink-0">
-            <div className="w-28 h-1 bg-slate-600 rounded-full" />
+          <div className="h-6 bg-slate-950 dark:bg-[#070709] flex items-center justify-center shrink-0">
+            <div className="w-28 h-1 bg-slate-600 dark:bg-[#27272A] rounded-full" />
           </div>
         </div>
       </div>

@@ -26,12 +26,12 @@
 ## 3. Strict Color Palette (2-3 Core + 1 Deliberate Accent)
 Sesuai aturan R-29 dan R-01, palet dibatasi secara ketat tanpa gradien ungu-biru generic:
 
-### Dark Mode (Railway-Inspired Industrial Studio)
-- **Base Canvas**: `#08070C` (Deep Railway Obsidian)
-- **Surface / Card / Bezel**: `#12101B` (Crisp Matte Obsidian Card) dengan 1px border `#221F33`
-- **Text Primary**: `#FFFFFF` / `#F3F4F6` (High contrast, WCAG AAA compliant)
-- **Text Secondary / Muted**: `#8E8C9A` (Subdued neutral lavender-tinted grey)
-- **Deliberate Accent**: `#7C3AED` / `#A78BFA` (Railway Signature Violet): *hanya untuk state aktif, indikator tab terseleksi, dan tombol aksi utama.*
+### Dark Mode (Clean Industrial Studio - No AI Slop Purple)
+- **Base Canvas**: `#09090B` (Neutral Deep Obsidian Charcoal)
+- **Surface / Card / Bezel**: `#121215` (Solid Matte Technical Surface) dengan 1px border `#202025`
+- **Text Primary**: `#F4F4F5` (High-contrast neutral off-white, WCAG AAA)
+- **Text Secondary / Muted**: `#8A8A93` (Neutral steel grey)
+- **Deliberate Accent**: `#0284C7` / `#38BDF8` (Dart & Flutter Sky Blue): *hanya untuk state aktif, indikator tab terseleksi, dan tombol aksi utama.*
 
 ### Light Mode (Clean Documentation Experience)
 - **Base Canvas**: `#F8FAFC` (Crisp Off-White)
